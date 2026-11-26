@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}{% if object %}Редактирование врача{% else %}Новый врач{% endif %}{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">{% if object %}Редактирование: {{ object }}{% else %}Новый врач{% endif %}</h1>
+<form method="post" enctype="multipart/form-data" class="card card-body" style="max-width:640px">
+    {% csrf_token %}
+    {% include 'includes/form_fields.html' %}
+    <div>
+        <button class="btn btn-primary">Сохранить</button>
+        <a href="{% if object %}{% url 'doctors:doctor_detail' object.pk %}{% else %}{% url 'doctors:doctor_list' %}{% endif %}" class="btn btn-link">Отмена</a>
+    </div>
+</form>
+{% endblock %}

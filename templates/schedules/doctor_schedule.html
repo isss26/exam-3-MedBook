@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}Расписание — {{ doctor }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 m-0">Расписание: <a href="{% url 'doctors:doctor_detail' doctor.pk %}">{{ doctor }}</a></h1>
+    {% if is_owner %}<a class="btn btn-primary" href="{% url 'schedules:slot_create' %}">+ Новый слот</a>{% endif %}
+</div>
+<table class="table table-bordered bg-white">
+    <thead>
+        <tr>
+            <th>Дата</th><th>Время</th>
+            {% if is_owner %}<th>Статус</th><th></th>{% endif %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for slot in slots %}
+            <tr>
+                <td>{{ slot.date|date:"d.m.Y" }}</td>
+                <td>{{ slot.start_time|time:"H:i" }}–{{ slot.end_time|time:"H:i" }}</td>
+                {% if is_owner %}
+                    <td>
+                        {% if slot.is_booked %}<span class="badge bg-warning text-dark">Занят</span>
+                        {% else %}<span class="badge bg-success">Свободен</span>{% endif %}
+                    </td>
+                    <td>
+                        {% if not slot.is_booked %}
+                            <form method="post" action="{% url 'schedules:slot_delete' slot.pk %}" class="m-0">
+                                {% csrf_token %}
+                                <button class="btn btn-sm btn-outline-danger">Удалить</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                {% endif %}
+            </tr>
+        {% empty %}
+            <tr><td colspan="4" class="text-muted">Слотов нет.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

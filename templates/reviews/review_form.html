@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}{% if review %}Изменить отзыв{% else %}Новый отзыв{% endif %}{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">{% if review %}Изменить отзыв{% else %}Отзыв о враче{% endif %}: {{ doctor }}</h1>
+<form method="post" class="card card-body" style="max-width:560px">
+    {% csrf_token %}
+    {% include 'includes/form_fields.html' %}
+    <div>
+        <button class="btn btn-primary">Сохранить</button>
+        <a href="{% url 'doctors:doctor_detail' doctor.pk %}" class="btn btn-link">Отмена</a>
+    </div>
+</form>
+{% endblock %}

@@ -1,0 +1,24 @@
+<nav class="navbar navbar-expand navbar-dark bg-primary mb-4">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'home' %}">MedBook</a>
+        <ul class="navbar-nav me-auto">
+            <li class="nav-item"><a class="nav-link" href="{% url 'doctors:doctor_list' %}">Врачи</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'doctors:specialization_list' %}">Специализации</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'doctors:service_list' %}">Услуги</a></li>
+            {% if is_doctor %}
+                <li class="nav-item"><a class="nav-link" href="{% url 'schedules:doctor_schedule' user.doctor.pk %}">Моё расписание</a></li>
+            {% endif %}
+        </ul>
+        <div class="d-flex align-items-center gap-2">
+            {% if user.is_authenticated %}
+                <span class="navbar-text text-white">{{ user.username }}</span>
+                <form method="post" action="{% url 'logout' %}" class="m-0">
+                    {% csrf_token %}
+                    <button class="btn btn-sm btn-light">Выйти</button>
+                </form>
+            {% else %}
+                <a class="btn btn-sm btn-light" href="{% url 'login' %}">Войти</a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
