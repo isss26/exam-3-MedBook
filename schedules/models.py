@@ -1,11 +1,12 @@
 from django.db import models
 
-# Create your models here.
 
 class TimeSlot(models.Model):
-    pass
-    # doctor	ForeignKey → Doctor
-    # date	DateField
-    # start_time	TimeField
-    # end_time	TimeField
-    # is_booked	BooleanField
+    doctor = models.ForeignKey('doctors.Doctor', on_delete=models.CASCADE, related_name='slots')
+    date = models.DateField()
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    is_booked = models.BooleanField(default=False)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=['doctor', 'date', 'start_time'], name='unique_slot')]
