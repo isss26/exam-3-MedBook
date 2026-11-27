@@ -9,4 +9,8 @@ class TimeSlot(models.Model):
     is_booked = models.BooleanField(default=False)
 
     class Meta:
+        ordering = ['date', 'start_time']
         constraints = [models.UniqueConstraint(fields=['doctor', 'date', 'start_time'], name='unique_slot')]
+
+    def __str__(self):
+        return f'{self.doctor} {self.date} {self.start_time:%H:%M}-{self.end_time:%H:%M}'

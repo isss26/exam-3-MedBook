@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
@@ -15,7 +16,8 @@ def doctor_schedule(request, doctor_id):
     if not doctor.is_active and not (is_owner or is_admin(request.user)):
         raise Http404
 
-    slots = doctor.slots.filter(date__gte=timezone.localdate())
+    now = timezone.localtime()
+    slots = doctor.slots.filter(Q(date__gt=now.date()) | Q(date=now.date(), start_time__gt=now.time()))
 
     if not is_owner:
         slots = slots.filter(is_booked=False)
@@ -26,7 +28,7 @@ def doctor_schedule(request, doctor_id):
 @doctor_required
 def slot_create(request):
     doctor = request.user.doctor
-    form = TimeSlotForm(request.POST or None)
+    form = TimeSlotForm(request.POST or None, doctor=doctor)
 
     if request.method == 'POST' and form.is_valid():
         slot = form.save(commit=False)

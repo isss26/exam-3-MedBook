@@ -10,6 +10,10 @@ urlpatterns = [
     path('<int:pk>/delete/', views.DoctorDeactivateView.as_view(), name='doctor_delete'),
     path('specializations/', views.SpecializationListView.as_view(), name='specialization_list'),
     path('specializations/create/', views.SpecializationCreateView.as_view(), name='specialization_create'),
+    path('services/', views.ServiceListView.as_view(), name='service_list'),
+    path('services/create/', views.ServiceCreateView.as_view(), name='service_create'),
+    path('services/<int:pk>/edit/', views.ServiceUpdateView.as_view(), name='service_edit'),
+    path('services/<int:pk>/delete/', views.ServiceDeleteView.as_view(), name='service_delete'),
     
     
 ]

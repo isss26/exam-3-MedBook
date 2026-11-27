@@ -28,6 +28,7 @@ def review_create(request, appointment_id):
     if request.method == 'POST' and form.is_valid():
         review = form.save(commit=False)
         review.appointment = appointment
+        review.doctor = doctor
         review.author = request.user
         review.save()
 
@@ -39,23 +40,22 @@ def review_create(request, appointment_id):
 
 @login_required
 def review_edit(request, pk):
-    review = get_object_or_404(DoctorReview.objects.select_related('appointment__slot__doctor'), pk=pk, author=request.user,)
-    doctor = review.appointment.slot.doctor
+    review = get_object_or_404(DoctorReview.objects.select_related('doctor__user'), pk=pk, author=request.user,)
     form = DoctorReviewForm(request.POST or None, instance=review)
 
     if request.method == 'POST' and form.is_valid():
         form.save()
 
         messages.success(request, 'Отзыв обновлён')
-        return redirect('doctors:doctor_detail', pk=doctor.pk)
+        return redirect('doctors:doctor_detail', pk=review.doctor.pk)
 
-    return render(request, 'reviews/review_form.html', {'form': form, 'doctor': doctor, 'review': review,})
+    return render(request, 'reviews/review_form.html', {'form': form, 'doctor': review.doctor, 'review': review,})
 
 
 @login_required
 def review_delete(request, pk):
-    review = get_object_or_404(DoctorReview.objects.select_related('appointment__slot__doctor'), pk=pk, author=request.user,)
-    doctor = review.appointment.slot.doctor
+    review = get_object_or_404(DoctorReview.objects.select_related('doctor__user'), pk=pk, author=request.user,)
+    doctor = review.doctor
 
     if request.method == 'POST':
         review.delete()

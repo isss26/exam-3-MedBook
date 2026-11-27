@@ -8,5 +8,4 @@ urlpatterns = [
     path('slots/<int:pk>/delete/', views.slot_delete, name='slot_delete'),
     
     
-    
 ]
