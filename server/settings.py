@@ -136,11 +136,29 @@ LOGIN_REDIRECT_URL = 'home'
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
+import os
+
+# Читаем .env без сторонних пакетов
+env_file = BASE_DIR / '.env'
+if env_file.exists():
+    for line in env_file.read_text().splitlines():
+        if '=' in line and not line.strip().startswith('#'):
+            key, value = line.split('=', 1)
+            os.environ.setdefault(key.strip(), value.strip().strip('"\''))
+
 MAILERS = {
     'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
+        'BACKEND': 'django.core.mail.backends.smtp.EmailBackend',
+        'OPTIONS': {
+            'host': os.environ.get('EMAIL_HOST'),
+            'port': int(os.environ.get('EMAIL_PORT', 587)),
+            'username': os.environ.get('EMAIL_HOST_USER'),
+            'password': os.environ.get('EMAIL_HOST_PASSWORD'),
+            'use_tls': os.environ.get('EMAIL_USE_TLS', 'True').lower() in ('1', 'true', 'yes'),
+        },
     },
 }
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')
 
 
 AUTH_USER_MODEL = 'accounts.User'
