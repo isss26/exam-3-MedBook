@@ -1,0 +1,6 @@
+<nav class="chips mb-3" aria-label="Фильтр по статусу">
+    <a href="?" class="chip{% if not selected_status %} is-active{% endif %}" {% if not selected_status %}aria-current="true"{% endif %}>Все</a>
+    {% for value, label in statuses %}
+        <a href="?status={{ value }}" class="chip{% if value == selected_status %} is-active{% endif %}" {% if value == selected_status %}aria-current="true"{% endif %}>{% include 'appointments/includes/status_label.html' with s=value %}</a>
+    {% endfor %}
+</nav>

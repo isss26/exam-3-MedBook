@@ -1,13 +1,14 @@
 {% extends 'base.html' %}
 {% block title %}Деактивация врача{% endblock %}
 {% block content %}
-<div class="card card-body" style="max-width:520px">
-    <h1 class="h4">Деактивировать врача?</h1>
-    <p>Врач <strong>{{ doctor }}</strong> пропадёт из каталога. Данные и отзывы сохранятся.</p>
-    <form method="post">
+<div class="panel confirm">
+    <div class="confirm__icon">{% include 'includes/icon.html' with name='alert' %}</div>
+    <h1>Деактивировать врача {{ doctor }}?</h1>
+    <p>Врач пропадёт из каталога, и пациенты не смогут к нему записаться. Данные и отзывы сохранятся.</p>
+    <form method="post" class="button-row">
         {% csrf_token %}
-        <button class="btn btn-danger">Деактивировать</button>
-        <a href="{% url 'doctors:doctor_detail' doctor.pk %}" class="btn btn-link">Отмена</a>
+        <a href="{% url 'doctors:doctor_detail' doctor.pk %}" class="button">Отмена</a>
+        <button class="button button--danger">Деактивировать</button>
     </form>
 </div>
 {% endblock %}

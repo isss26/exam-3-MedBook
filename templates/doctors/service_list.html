@@ -1,23 +1,35 @@
 {% extends 'base.html' %}
 {% block title %}Услуги{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h3 m-0">Услуги</h1>
-    {% if is_admin %}<a class="btn btn-primary" href="{% url 'doctors:service_create' %}">+ Добавить</a>{% endif %}
-</div>
-<ul class="list-group">
+<header class="page-head">
+    <div>
+        <h1>Услуги клиники</h1>
+        <p>Что можно сделать на приёме и сколько врачей это выполняют.</p>
+    </div>
+    {% if is_admin %}<a class="button button--primary" href="{% url 'doctors:service_create' %}">{% include 'includes/icon.html' with name='plus' %}Добавить услугу</a>{% endif %}
+</header>
+{% if services %}
+<ul class="list">
     {% for service in services %}
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-            <span>{{ service.name }} <small class="text-muted">· врачей: {{ service.doctors_count }}</small></span>
+        <li class="list__item">
+            <div>
+                <div class="list__title">{{ service.name }}</div>
+                <div class="list__sub">врачей: {{ service.doctors_count }}</div>
+            </div>
             {% if is_admin %}
-                <span>
-                    <a href="{% url 'doctors:service_edit' service.pk %}" class="btn btn-sm btn-outline-secondary">Изменить</a>
-                    <a href="{% url 'doctors:service_delete' service.pk %}" class="btn btn-sm btn-outline-danger">Удалить</a>
-                </span>
+                <div class="button-row">
+                    <a href="{% url 'doctors:service_edit' service.pk %}" class="button button--sm">Изменить</a>
+                    <a href="{% url 'doctors:service_delete' service.pk %}" class="button button--sm button--danger-ghost">Удалить</a>
+                </div>
             {% endif %}
         </li>
-    {% empty %}
-        <li class="list-group-item text-muted">Услуг пока нет.</li>
     {% endfor %}
 </ul>
+{% else %}
+<div class="empty">
+    <strong>Услуг пока нет</strong>
+    {% if is_admin %}Добавьте услуги, чтобы привязать их к врачам.
+    <div><a class="button button--sm button--primary" href="{% url 'doctors:service_create' %}">Добавить услугу</a></div>{% else %}Список услуг скоро появится.{% endif %}
+</div>
+{% endif %}
 {% endblock %}

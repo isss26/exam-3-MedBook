@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Вход{% endblock %}
+{% block content %}
+<div class="auth">
+    {% include 'includes/auth_aside.html' %}
+    <div class="auth__main">
+        <h1>Вход</h1>
+        <p class="auth__lead">Войдите, чтобы записаться к врачу и видеть свои записи.</p>
+        {% if error %}<div class="flash flash--danger" role="alert"><span class="flash__icon">{% include 'includes/icon.html' with name='alert' %}</span><div class="flash__text">{{ error }}</div></div><div style="height:16px"></div>{% endif %}
+        {% if message %}<div class="flash flash--success" role="status"><span class="flash__icon">{% include 'includes/icon.html' with name='check' %}</span><div class="flash__text">{{ message }}</div></div><div style="height:16px"></div>{% endif %}
+        <form method="post">
+            {% csrf_token %}
+            <div class="field">
+                <label class="field__label" for="username">Логин</label>
+                <input class="form-control" type="text" name="username" id="username" value="{{ request.POST.username }}" autocomplete="username" autocapitalize="none" required autofocus>
+            </div>
+            <div class="field">
+                <label class="field__label" for="password">Пароль</label>
+                <input class="form-control" type="password" name="password" id="password" autocomplete="current-password" required>
+            </div>
+            <button class="button button--primary button--lg button--block">Войти</button>
+        </form>
+        <p class="auth__switch">Нет аккаунта? <a href="{% url 'register' %}">Зарегистрироваться</a></p>
+    </div>
+</div>
+{% endblock %}

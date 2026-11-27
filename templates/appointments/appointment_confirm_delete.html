@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Удаление записи{% endblock %}
+{% block content %}
+<div class="panel confirm">
+    <div class="confirm__icon">{% include 'includes/icon.html' with name='trash' %}</div>
+    <h1>Удалить запись?</h1>
+    <p>Запись к врачу <strong>{{ object.slot.doctor }}</strong> на {{ object.slot.date|date:"j E" }} в {{ object.slot.start_time|time:"H:i" }} исчезнет из вашей истории. Это действие нельзя отменить.</p>
+    <form method="post" class="button-row">
+        {% csrf_token %}
+        <a href="{% url 'appointments:appointment_detail' object.pk %}" class="button">Отмена</a>
+        <button class="button button--danger">Удалить запись</button>
+    </form>
+</div>
+{% endblock %}

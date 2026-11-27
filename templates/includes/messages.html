@@ -1,3 +1,13 @@
-{% for message in messages %}
-    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %}">{{ message }}</div>
-{% endfor %}
+{% if messages %}
+<div class="flashes" role="status" aria-live="polite">
+    {% for message in messages %}
+        {% with tag=message.tags|default:'info' %}
+        <div class="flash flash--{% if tag == 'error' %}danger{% else %}{{ tag }}{% endif %}">
+            <span class="flash__icon">{% if tag == 'success' %}{% include 'includes/icon.html' with name='check' %}{% elif tag == 'error' or tag == 'warning' %}{% include 'includes/icon.html' with name='alert' %}{% else %}{% include 'includes/icon.html' with name='info' %}{% endif %}</span>
+            <div class="flash__text">{{ message }}</div>
+            <button type="button" class="flash__close" aria-label="Закрыть">{% include 'includes/icon.html' with name='close' %}</button>
+        </div>
+        {% endwith %}
+    {% endfor %}
+</div>
+{% endif %}

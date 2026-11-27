@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block title %}Запись №{{ appointment.pk }}{% endblock %}
+{% block content %}
+{% with st=appointment.status %}
+<a class="back-link" href="{% if appointment.slot.doctor.user == user %}{% url 'appointments:doctor_appointments' %}{% else %}{% url 'appointments:my_appointments' %}{% endif %}">{% include 'includes/icon.html' with name='back' %}Все записи</a>
+
+<header class="page-head">
+    <div>
+        <h1>Запись №{{ appointment.pk }}</h1>
+        <p>Создана {{ appointment.created_at|date:"j E Y, H:i" }}</p>
+    </div>
+</header>
+
+<div class="detail-layout">
+    <div>
+        {% include 'appointments/includes/ticket.html' with slot=appointment.slot %}
+
+        <div class="panel" style="margin-top:16px">
+            {% if st == 'cancelled' %}
+                <p class="m-0"><span class="status status--cancelled">Отменена</span> <span class="muted">Время освобождено для других пациентов.</span></p>
+            {% else %}
+                <ol class="progress-track" aria-label="Ход записи">
+                    <li class="{% if st == 'pending' %}is-current{% else %}is-done{% endif %}" {% if st == 'pending' %}aria-current="step"{% endif %}>Ожидает подтверждения</li>
+                    <li class="{% if st == 'confirmed' %}is-current{% elif st == 'completed' %}is-done{% endif %}" {% if st == 'confirmed' %}aria-current="step"{% endif %}>Подтверждена врачом</li>
+                    <li class="{% if st == 'completed' %}is-done{% endif %}" {% if st == 'completed' %}aria-current="step"{% endif %}>Приём завершён</li>
+                </ol>
+            {% endif %}
+
+            <dl class="details" style="margin-top:20px">
+                <dt>Пациент</dt>
+                <dd>{{ appointment.patient.get_full_name|default:appointment.patient.username }}</dd>
+                <dt>Комментарий</dt>
+                <dd>{% if appointment.comment %}<div class="note">{{ appointment.comment|linebreaksbr }}</div>{% else %}<span class="muted">Без комментария</span>{% endif %}</dd>
+            </dl>
+
+            <div class="form-actions">
+                {# Действия пациента #}
+                {% if appointment.patient == user %}
+                    {% if st == 'pending' %}
+                        <a href="{% url 'appointments:appointment_edit' appointment.pk %}" class="button button--sm">{% include 'includes/icon.html' with name='edit' %}Изменить комментарий</a>
+                    {% endif %}
+                    {% if st == 'pending' or st == 'confirmed' %}
+                        <form method="post" action="{% url 'appointments:cancel_appointment' appointment.pk %}" class="m-0" data-confirm="Отменить запись? Время станет доступно другим пациентам.">
+                            {% csrf_token %}
+                            <button class="button button--sm button--danger-ghost">Отменить запись</button>
+                        </form>
+                    {% endif %}
+                    {% if st == 'completed' %}
+                        {% if appointment.review %}
+                            <a href="{% url 'reviews:review_edit' appointment.review.pk %}" class="button button--sm">{% include 'includes/icon.html' with name='star' %}Изменить отзыв</a>
+                        {% else %}
+                            <a href="{% url 'reviews:review_create' appointment.pk %}" class="button button--sm button--primary">{% include 'includes/icon.html' with name='star' %}Оставить отзыв</a>
+                        {% endif %}
+                    {% endif %}
+                    {% if st == 'cancelled' %}
+                        <a href="{% url 'appointments:appointment_delete' appointment.pk %}" class="button button--sm button--danger-ghost">{% include 'includes/icon.html' with name='trash' %}Удалить запись</a>
+                    {% endif %}
+                {% endif %}
+
+                {# Действия врача #}
+                {% if appointment.slot.doctor.user == user %}
+                    {% if st == 'pending' %}
+                        <form method="post" action="{% url 'appointments:confirm_appointment' appointment.pk %}" class="m-0">
+                            {% csrf_token %}
+                            <button class="button button--sm button--primary">Подтвердить запись</button>
+                        </form>
+                    {% elif st == 'confirmed' %}
+                        <form method="post" action="{% url 'appointments:complete_appointment' appointment.pk %}" class="m-0">
+                            {% csrf_token %}
+                            <button class="button button--sm button--success">Завершить приём</button>
+                        </form>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <aside class="panel" aria-labelledby="history-title">
+        <h2 class="section-title" id="history-title">История</h2>
+        <ol class="timeline">
+            {% for item in appointment.history.all reversed %}
+                <li>
+                    <div class="timeline__head">
+                        <span class="status status--{{ item.new_status }}">{% include 'appointments/includes/status_label.html' with s=item.new_status %}</span>
+                    </div>
+                    <div class="timeline__meta">
+                        <time datetime="{{ item.changed_at|date:'c' }}">{{ item.changed_at|date:"j E, H:i" }}</time>
+                        {% if item.changed_by %} · {{ item.changed_by.get_full_name|default:item.changed_by.username }}{% endif %}
+                    </div>
+                </li>
+            {% empty %}
+                <li class="muted">Изменений пока не было.</li>
+            {% endfor %}
+        </ol>
+    </aside>
+</div>
+{% endwith %}
+{% endblock %}

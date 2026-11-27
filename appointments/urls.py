@@ -15,4 +15,6 @@ urlpatterns = [
     path('<int:pk>/confirm/', views.confirm_appointment, name='confirm_appointment'),
     path('<int:pk>/complete/', views.complete_appointment, name='complete_appointment'),
     path('dashboard/', views.dashboard, name='dashboard'),
+    
+    
 ]

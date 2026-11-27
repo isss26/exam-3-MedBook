@@ -1,40 +1,61 @@
 {% extends 'base.html' %}
 {% block title %}Расписание — {{ doctor }}{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h3 m-0">Расписание: <a href="{% url 'doctors:doctor_detail' doctor.pk %}">{{ doctor }}</a></h1>
-    {% if is_owner %}<a class="btn btn-primary" href="{% url 'schedules:slot_create' %}">+ Новый слот</a>{% endif %}
-</div>
-<table class="table table-bordered bg-white">
-    <thead>
-        <tr>
-            <th>Дата</th><th>Время</th>
-            {% if is_owner %}<th>Статус</th><th></th>{% endif %}
-        </tr>
-    </thead>
-    <tbody>
-        {% for slot in slots %}
-            <tr>
-                <td>{{ slot.date|date:"d.m.Y" }}</td>
-                <td>{{ slot.start_time|time:"H:i" }}–{{ slot.end_time|time:"H:i" }}</td>
-                {% if is_owner %}
-                    <td>
-                        {% if slot.is_booked %}<span class="badge bg-warning text-dark">Занят</span>
-                        {% else %}<span class="badge bg-success">Свободен</span>{% endif %}
-                    </td>
-                    <td>
-                        {% if not slot.is_booked %}
-                            <form method="post" action="{% url 'schedules:slot_delete' slot.pk %}" class="m-0">
-                                {% csrf_token %}
-                                <button class="btn btn-sm btn-outline-danger">Удалить</button>
-                            </form>
-                        {% endif %}
-                    </td>
-                {% endif %}
-            </tr>
-        {% empty %}
-            <tr><td colspan="4" class="text-muted">Слотов нет.</td></tr>
+<a class="back-link" href="{% url 'doctors:doctor_detail' doctor.pk %}">{% include 'includes/icon.html' with name='back' %}Профиль врача</a>
+
+<header class="page-head">
+    <div class="person">
+        {% include 'includes/avatar.html' with u=doctor.user photo=doctor.photo cls='avatar--lg' %}
+        <div>
+            <h1>{% if is_owner %}Моё расписание{% else %}Расписание: {{ doctor }}{% endif %}</h1>
+            <p>{% if is_owner %}Свободные слоты видят пациенты. Занятые можно открыть в разделе «Записи ко мне».{% else %}{{ doctor.specialization }} · свободное время для записи{% endif %}</p>
+        </div>
+    </div>
+    {% if is_owner %}
+        <div class="button-row">
+            <a class="button" href="{% url 'appointments:doctor_appointments' %}">Записи ко мне</a>
+            <a class="button button--primary" href="{% url 'schedules:slot_create' %}">{% include 'includes/icon.html' with name='plus' %}Новый слот</a>
+        </div>
+    {% endif %}
+</header>
+
+{% if is_owner %}
+    {% regroup slots by date as days %}
+    {% if days %}
+    <div class="days">
+        {% for day in days %}
+            <section class="day">
+                <h2 class="day__label">{{ day.grouper|date:"j E" }} <span class="muted">{{ day.grouper|date:"l"|lower }}</span></h2>
+                <div class="slots">
+                    {% for slot in day.list %}
+                        <div class="slot{% if slot.is_booked %} is-booked{% endif %}">
+                            <span class="slot__time">{{ slot.start_time|time:"H:i" }}</span>
+                            <span class="slot__end">до {{ slot.end_time|time:"H:i" }}</span>
+                            <div class="slot__foot">
+                                {% if slot.is_booked %}
+                                    <span class="status status--booked">Занят</span>
+                                {% else %}
+                                    <span class="status status--free">Свободен</span>
+                                    <form method="post" action="{% url 'schedules:slot_delete' slot.pk %}" data-confirm="Удалить слот {{ slot.date|date:'j E' }}, {{ slot.start_time|time:'H:i' }}?">
+                                        {% csrf_token %}
+                                        <button class="slot__remove" aria-label="Удалить слот {{ slot.start_time|time:'H:i' }}">{% include 'includes/icon.html' with name='trash' %}</button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </section>
         {% endfor %}
-    </tbody>
-</table>
+    </div>
+    {% else %}
+    <div class="empty">
+        <strong>В расписании пока пусто</strong>
+        Добавьте первый слот, чтобы пациенты могли к вам записаться.
+        <div><a class="button button--sm button--primary" href="{% url 'schedules:slot_create' %}">Добавить слот</a></div>
+    </div>
+    {% endif %}
+{% else %}
+    {% include 'appointments/includes/slot_days.html' with slots=slots %}
+{% endif %}
 {% endblock %}

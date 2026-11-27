@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}Записи ко мне{% endblock %}
+{% block content %}
+<header class="page-head">
+    <div>
+        <h1>Записи ко мне</h1>
+        <p>Подтвердите новые записи и отметьте завершённые приёмы.</p>
+    </div>
+    {% if is_doctor %}<a class="button" href="{% url 'schedules:doctor_schedule' user.doctor.pk %}">{% include 'includes/icon.html' with name='calendar' %}Моё расписание</a>{% endif %}
+</header>
+
+{% include 'appointments/includes/status_filter.html' %}
+
+{% if appointments %}
+<div class="table-wrap">
+    <table class="data-table">
+        <thead>
+            <tr><th scope="col">Пациент</th><th scope="col">Дата</th><th scope="col">Время</th><th scope="col">Комментарий</th><th scope="col">Статус</th><th scope="col"><span class="visually-hidden">Действия</span></th></tr>
+        </thead>
+        <tbody>
+            {% for appointment in appointments %}
+                <tr>
+                    <td class="cell-main">
+                        <div class="person">
+                            {% include 'includes/avatar.html' with u=appointment.patient cls='avatar--sm' %}
+                            <span class="person__name">{{ appointment.patient.get_full_name|default:appointment.patient.username }}</span>
+                        </div>
+                    </td>
+                    <td data-label="Дата" class="cell-strong">{{ appointment.slot.date|date:"j E" }}</td>
+                    <td data-label="Время" class="tabular">{{ appointment.slot.start_time|time:"H:i" }}–{{ appointment.slot.end_time|time:"H:i" }}</td>
+                    <td data-label="Комментарий" class="muted" style="max-width:260px">{{ appointment.comment|truncatechars:60|default:"—" }}</td>
+                    <td data-label="Статус">{% include 'appointments/includes/status_badge.html' %}</td>
+                    <td class="actions">
+                        <div class="button-row">
+                            {% if appointment.status == 'pending' %}
+                                <form method="post" action="{% url 'appointments:confirm_appointment' appointment.pk %}">
+                                    {% csrf_token %}
+                                    <button class="button button--sm button--primary">Подтвердить</button>
+                                </form>
+                            {% elif appointment.status == 'confirmed' %}
+                                <form method="post" action="{% url 'appointments:complete_appointment' appointment.pk %}">
+                                    {% csrf_token %}
+                                    <button class="button button--sm button--success">Завершить</button>
+                                </form>
+                            {% endif %}
+                            <a href="{% url 'appointments:appointment_detail' appointment.pk %}" class="button button--sm">Открыть</a>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty">
+    <strong>{% if selected_status %}Записей с таким статусом нет{% else %}К вам пока никто не записался{% endif %}</strong>
+    {% if selected_status %}Выберите другой статус.{% else %}Добавьте свободные слоты в расписание, чтобы пациенты могли записаться.{% endif %}
+    {% if is_doctor and not selected_status %}<div><a class="button button--sm button--primary" href="{% url 'schedules:slot_create' %}">Добавить слот</a></div>{% endif %}
+</div>
+{% endif %}
+{% endblock %}

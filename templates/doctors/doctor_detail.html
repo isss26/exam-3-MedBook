@@ -1,67 +1,95 @@
 {% extends 'base.html' %}
 {% block title %}{{ doctor }}{% endblock %}
 {% block content %}
-<div class="row g-4">
-    <div class="col-md-4">
-        {% if doctor.photo %}<img src="{{ doctor.photo.url }}" class="img-fluid rounded" alt="{{ doctor }}">{% endif %}
-    </div>
-    <div class="col-md-8">
-        <h1 class="h3">
-            {{ doctor }}
-            {% if not doctor.is_active %}<span class="badge bg-secondary">неактивен</span>{% endif %}
-        </h1>
-        <p class="text-muted">{{ doctor.specialization }}</p>
-        {% if rating.count %}
-            <p>★ {{ rating.avg|floatformat:1 }} · отзывов: {{ rating.count }}</p>
+<a class="back-link" href="{% url 'doctors:doctor_list' %}">{% include 'includes/icon.html' with name='back' %}Все врачи</a>
+
+<div class="profile-layout">
+    <aside class="panel profile-card">
+        {% if doctor.photo %}
+            <img src="{{ doctor.photo.url }}" class="profile-card__photo" alt="Фото: {{ doctor }}">
         {% else %}
-            <p class="text-muted">Пока нет отзывов</p>
+            {% include 'includes/avatar.html' with u=doctor.user cls='avatar--xl' %}
         {% endif %}
-        {% if doctor.description %}<p>{{ doctor.description|linebreaksbr }}</p>{% endif %}
 
-        <a class="btn btn-sm btn-outline-primary" href="{% url 'schedules:doctor_schedule' doctor.pk %}">Расписание</a>
-        {% if is_admin %}
-            <a class="btn btn-sm btn-outline-secondary" href="{% url 'doctors:doctor_edit' doctor.pk %}">Редактировать</a>
-            {% if doctor.is_active %}
-                <a class="btn btn-sm btn-outline-danger" href="{% url 'doctors:doctor_delete' doctor.pk %}">Деактивировать</a>
-            {% endif %}
+        <h1>{{ doctor }}</h1>
+        <div class="profile-card__spec tags">
+            <span class="tag tag--primary">{{ doctor.specialization }}</span>
+            {% if not doctor.is_active %}<span class="status status--cancelled">Неактивен</span>{% endif %}
+        </div>
+
+        {% if rating.count %}
+            <span class="rating">{% include 'includes/icon.html' with name='star' %}{{ rating.avg|floatformat:1 }} <span class="rating__count">· отзывов: {{ rating.count }}</span></span>
+        {% else %}
+            <span class="rating--none">Пока нет отзывов</span>
         {% endif %}
-    </div>
-</div>
 
-<h2 class="h5 mt-4">Услуги</h2>
-<ul>
-    {% for service in doctor.services.all %}
-        <li>{{ service.name }}</li>
-    {% empty %}
-        <li class="text-muted">Не указаны</li>
-    {% endfor %}
-</ul>
+        {% if doctor.description %}<p class="profile-card__desc">{{ doctor.description|linebreaksbr }}</p>{% endif %}
 
-<h2 class="h5 mt-4">Свободные слоты</h2>
-<div class="d-flex flex-wrap gap-2">
-    {% for slot in free_slots %}
-        <a href="/appointments/book/{{ slot.pk }}/" class="btn btn-outline-success btn-sm">
-            {{ slot.date|date:"d.m.Y" }} {{ slot.start_time|time:"H:i" }}–{{ slot.end_time|time:"H:i" }}
-        </a>
-    {% empty %}
-        <p class="text-muted">Свободных слотов нет.</p>
-    {% endfor %}
-</div>
+        <div class="profile-card__block">
+            <h2>Услуги</h2>
+            <div class="tags">
+                {% for service in doctor.services.all %}
+                    <span class="tag">{{ service.name }}</span>
+                {% empty %}
+                    <span class="muted">Не указаны</span>
+                {% endfor %}
+            </div>
+        </div>
 
-<h2 class="h5 mt-4">Отзывы</h2>
-{% for review in reviews %}
-    <div class="card mb-2">
-        <div class="card-body">
-            <strong>{{ review.author.username }}</strong> — ★ {{ review.rating }}
-            <small class="text-muted">{{ review.created_at|date:"d.m.Y" }}</small>
-            {% if review.text %}<p class="mb-1 mt-2">{{ review.text|linebreaksbr }}</p>{% endif %}
-            {% if review.author_id == user.id %}
-                <a href="{% url 'reviews:review_edit' review.pk %}" class="btn btn-sm btn-link px-0">Изменить</a>
-                <a href="{% url 'reviews:review_delete' review.pk %}" class="btn btn-sm btn-link text-danger">Удалить</a>
+        <div class="profile-card__block button-row">
+            <a class="button button--sm" href="{% url 'schedules:doctor_schedule' doctor.pk %}">{% include 'includes/icon.html' with name='calendar' %}Расписание</a>
+            {% if is_admin %}
+                <a class="button button--sm" href="{% url 'doctors:doctor_edit' doctor.pk %}">{% include 'includes/icon.html' with name='edit' %}Изменить</a>
+                {% if doctor.is_active %}
+                    <a class="button button--sm button--danger-ghost" href="{% url 'doctors:doctor_delete' doctor.pk %}">Деактивировать</a>
+                {% endif %}
             {% endif %}
         </div>
+    </aside>
+
+    <div>
+        <section class="section" aria-labelledby="slots-title">
+            <h2 class="section-title" id="slots-title">Свободное время</h2>
+            {% include 'appointments/includes/slot_days.html' with slots=free_slots %}
+        </section>
+
+        <section class="section" aria-labelledby="reviews-title">
+            <h2 class="section-title" id="reviews-title">Отзывы пациентов</h2>
+            {% if rating.count %}
+                <div class="rating-summary">
+                    <span class="rating-summary__value">{{ rating.avg|floatformat:1 }}</span>
+                    <span class="muted">средняя оценка<br>по {{ rating.count }} отзыв{{ rating.count|pluralize:"у,ам" }}</span>
+                </div>
+            {% endif %}
+            <div class="reviews">
+                {% for review in reviews %}
+                    <article class="review">
+                        <div class="review__head">
+                            {% include 'includes/avatar.html' with u=review.author cls='avatar--sm' %}
+                            <div>
+                                <div class="review__author">{{ review.author.get_full_name|default:review.author.username }}</div>
+                                <time class="review__date" datetime="{{ review.created_at|date:'c' }}">{{ review.created_at|date:"j E Y" }}</time>
+                            </div>
+                            <span class="review__stars" role="img" aria-label="Оценка {{ review.rating }} из 5">
+                                {% for i in "12345" %}<svg viewBox="0 0 24 24" fill="currentColor" class="{% if forloop.counter <= review.rating %}is-on{% endif %}" aria-hidden="true"><path d="M12 2.8l2.8 5.7 6.3.9-4.6 4.4 1.1 6.3L12 17.1l-5.6 3 1.1-6.3L2.9 9.4l6.3-.9L12 2.8Z"/></svg>{% endfor %}
+                            </span>
+                        </div>
+                        {% if review.text %}<p class="review__text">{{ review.text|linebreaksbr }}</p>{% endif %}
+                        {% if review.author_id == user.id %}
+                            <div class="review__actions">
+                                <a href="{% url 'reviews:review_edit' review.pk %}" class="button button--ghost button--sm">Изменить</a>
+                                <a href="{% url 'reviews:review_delete' review.pk %}" class="button button--ghost button--sm" style="color:var(--danger)">Удалить</a>
+                            </div>
+                        {% endif %}
+                    </article>
+                {% empty %}
+                    <div class="empty">
+                        <strong>Отзывов пока нет</strong>
+                        Оставить отзыв можно после завершённого приёма.
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
     </div>
-{% empty %}
-    <p class="text-muted">Отзывов пока нет.</p>
-{% endfor %}
+</div>
 {% endblock %}

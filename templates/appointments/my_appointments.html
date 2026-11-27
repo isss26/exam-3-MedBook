@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}Мои записи{% endblock %}
+{% block content %}
+<header class="page-head">
+    <div>
+        <h1>Мои записи</h1>
+        <p>Предстоящие и прошедшие приёмы.</p>
+    </div>
+    <a class="button button--primary" href="{% url 'doctors:doctor_list' %}">{% include 'includes/icon.html' with name='plus' %}Записаться к врачу</a>
+</header>
+
+{% include 'appointments/includes/status_filter.html' %}
+
+{% if appointments %}
+<div class="table-wrap">
+    <table class="data-table">
+        <thead>
+            <tr><th scope="col">Врач</th><th scope="col">Дата</th><th scope="col">Время</th><th scope="col">Статус</th><th scope="col"><span class="visually-hidden">Действия</span></th></tr>
+        </thead>
+        <tbody>
+            {% for appointment in appointments %}
+                <tr>
+                    <td class="cell-main">
+                        <div class="person">
+                            {% include 'includes/avatar.html' with u=appointment.slot.doctor.user photo=appointment.slot.doctor.photo cls='avatar--sm' %}
+                            <div>
+                                <div class="person__name">{{ appointment.slot.doctor }}</div>
+                                <div class="person__sub">{{ appointment.slot.doctor.specialization }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td data-label="Дата" class="cell-strong">{{ appointment.slot.date|date:"j E, D" }}</td>
+                    <td data-label="Время" class="num" style="text-align:inherit">{{ appointment.slot.start_time|time:"H:i" }}–{{ appointment.slot.end_time|time:"H:i" }}</td>
+                    <td data-label="Статус">{% include 'appointments/includes/status_badge.html' %}</td>
+                    <td class="actions"><a href="{% url 'appointments:appointment_detail' appointment.pk %}" class="button button--sm">Открыть</a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty">
+    <strong>{% if selected_status %}Записей с таким статусом нет{% else %}У вас пока нет записей{% endif %}</strong>
+    {% if selected_status %}Выберите другой статус или посмотрите все записи.{% else %}Выберите врача и удобное время — запись займёт минуту.{% endif %}
+    <div><a class="button button--sm button--primary" href="{% url 'doctors:doctor_list' %}">Найти врача</a></div>
+</div>
+{% endif %}
+{% endblock %}

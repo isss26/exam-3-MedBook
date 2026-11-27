@@ -1,0 +1,25 @@
+{# Свободные слоты, сгруппированные по дням. Параметр: slots #}
+{% regroup slots by date as days %}
+{% if days %}
+<div class="days">
+    {% for day in days %}
+        <section class="day" aria-labelledby="day-{{ day.grouper|date:'Ymd' }}">
+            <h3 class="day__label" id="day-{{ day.grouper|date:'Ymd' }}">{{ day.grouper|date:"j E" }} <span class="muted">{{ day.grouper|date:"l"|lower }}</span></h3>
+            <div class="slots">
+                {% for slot in day.list %}
+                    <a class="slot" href="{% url 'appointments:book_appointment' slot.pk %}" aria-label="Записаться на {{ slot.date|date:'j E' }}, {{ slot.start_time|time:'H:i' }}">
+                        <span class="slot__time">{{ slot.start_time|time:"H:i" }}</span>
+                        <span class="slot__end">до {{ slot.end_time|time:"H:i" }}</span>
+                    </a>
+                {% endfor %}
+            </div>
+        </section>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty">
+    <strong>Свободного времени пока нет</strong>
+    Врач ещё не открыл запись. Загляните позже или выберите другого специалиста.
+    <div><a class="button button--sm" href="{% url 'doctors:doctor_list' %}">Все врачи</a></div>
+</div>
+{% endif %}

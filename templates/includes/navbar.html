@@ -1,24 +1,51 @@
-<nav class="navbar navbar-expand navbar-dark bg-primary mb-4">
-    <div class="container">
-        <a class="navbar-brand" href="{% url 'home' %}">MedBook</a>
-        <ul class="navbar-nav me-auto">
-            <li class="nav-item"><a class="nav-link" href="{% url 'doctors:doctor_list' %}">Врачи</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'doctors:specialization_list' %}">Специализации</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'doctors:service_list' %}">Услуги</a></li>
-            {% if is_doctor %}
-                <li class="nav-item"><a class="nav-link" href="{% url 'schedules:doctor_schedule' user.doctor.pk %}">Моё расписание</a></li>
-            {% endif %}
-        </ul>
-        <div class="d-flex align-items-center gap-2">
-            {% if user.is_authenticated %}
-                <span class="navbar-text text-white">{{ user.username }}</span>
-                <form method="post" action="{% url 'logout' %}" class="m-0">
-                    {% csrf_token %}
-                    <button class="btn btn-sm btn-light">Выйти</button>
-                </form>
-            {% else %}
-                <a class="btn btn-sm btn-light" href="{% url 'login' %}">Войти</a>
-            {% endif %}
-        </div>
+{% with un=request.resolver_match.url_name %}
+<header class="topbar">
+    <div class="container topbar__inner">
+        <a class="brand" href="{% url 'home' %}">
+            <span class="brand__mark">{% include 'includes/icon.html' with name='cross' %}</span>
+            MedBook
+        </a>
+
+        <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="site-nav" aria-label="Меню">
+            <span></span>
+        </button>
+
+        <nav id="site-nav" class="nav" aria-label="Основная навигация">
+            <ul class="nav__links">
+                <li><a class="nav__link" href="{% url 'doctors:doctor_list' %}" {% if un == 'doctor_list' or un == 'doctor_detail' or un == 'available_slots' %}aria-current="page"{% endif %}>Врачи</a></li>
+                <li><a class="nav__link" href="{% url 'doctors:specialization_list' %}" {% if un == 'specialization_list' %}aria-current="page"{% endif %}>Специализации</a></li>
+                <li><a class="nav__link" href="{% url 'doctors:service_list' %}" {% if un == 'service_list' %}aria-current="page"{% endif %}>Услуги</a></li>
+                {% if user.is_authenticated and user.role == 'patient' %}
+                    <li><a class="nav__link" href="{% url 'appointments:my_appointments' %}" {% if un == 'my_appointments' %}aria-current="page"{% endif %}>Мои записи</a></li>
+                {% endif %}
+                {% if is_doctor %}
+                    <li><a class="nav__link" href="{% url 'schedules:doctor_schedule' user.doctor.pk %}" {% if un == 'doctor_schedule' %}aria-current="page"{% endif %}>Моё расписание</a></li>
+                    <li><a class="nav__link" href="{% url 'appointments:doctor_appointments' %}" {% if un == 'doctor_appointments' %}aria-current="page"{% endif %}>Записи ко мне</a></li>
+                {% endif %}
+                {% if is_admin %}
+                    <li><a class="nav__link" href="{% url 'appointments:dashboard' %}" {% if un == 'dashboard' %}aria-current="page"{% endif %}>Статистика</a></li>
+                {% endif %}
+            </ul>
+
+            <div class="nav__account">
+                {% if user.is_authenticated %}
+                    <a class="account" href="{% url 'profile' %}" {% if un == 'profile' %}aria-current="page"{% endif %}>
+                        {% include 'includes/avatar.html' with u=user cls='avatar--sm' %}
+                        <span class="account__text">
+                            <span class="account__name">{{ user.get_full_name|default:user.username }}</span>
+                            <span class="account__role">{{ user.get_role_display }}</span>
+                        </span>
+                    </a>
+                    <form method="post" action="{% url 'logout' %}" class="m-0">
+                        {% csrf_token %}
+                        <button class="button button--ghost button--sm">Выйти</button>
+                    </form>
+                {% else %}
+                    <a class="button button--ghost button--sm" href="{% url 'login' %}">Войти</a>
+                    <a class="button button--primary button--sm" href="{% url 'register' %}">Регистрация</a>
+                {% endif %}
+            </div>
+        </nav>
     </div>
-</nav>
+</header>
+{% endwith %}

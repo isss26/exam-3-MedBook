@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Запись — {{ doctor }}{% endblock %}
+{% block content %}
+<a class="back-link" href="{% url 'doctors:doctor_detail' doctor.pk %}">{% include 'includes/icon.html' with name='back' %}Профиль врача</a>
+
+<ol class="steps" aria-label="Шаги записи">
+    <li class="is-done">Врач</li>
+    <li class="is-current" aria-current="step">Время</li>
+    <li>Подтверждение</li>
+</ol>
+
+<header class="page-head">
+    <div class="person">
+        {% include 'includes/avatar.html' with u=doctor.user photo=doctor.photo cls='avatar--lg' %}
+        <div>
+            <h1>{{ doctor }}</h1>
+            <p>{{ doctor.specialization }} · выберите удобное время приёма</p>
+        </div>
+    </div>
+</header>
+
+{% include 'appointments/includes/slot_days.html' with slots=slots %}
+{% endblock %}

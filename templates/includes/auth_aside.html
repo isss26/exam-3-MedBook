@@ -1,0 +1,17 @@
+<aside class="auth__aside">
+    <div>
+        <a class="brand" href="{% url 'home' %}" style="color:#fff">
+            <span class="brand__mark" style="background:rgba(255,255,255,.2)">{% include 'includes/icon.html' with name='cross' %}</span>
+            MedBook
+        </a>
+    </div>
+    <div>
+        <h2>Запись к врачу без очередей и звонков</h2>
+        <p>Свободное время врачей видно сразу — выбирайте, когда удобно вам.</p>
+    </div>
+    <ul class="auth__points">
+        <li>{% include 'includes/icon.html' with name='calendar' %}Расписание врачей на ближайшие дни</li>
+        <li>{% include 'includes/icon.html' with name='clipboard' %}История записей и статусы в одном месте</li>
+        <li>{% include 'includes/icon.html' with name='star' %}Честные отзывы после приёма</li>
+    </ul>
+</aside>

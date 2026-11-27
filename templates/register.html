@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Регистрация{% endblock %}
+{% block content %}
+<div class="auth">
+    {% include 'includes/auth_aside.html' %}
+    <div class="auth__main">
+        <h1>Регистрация</h1>
+        <p class="auth__lead">После регистрации мы отправим письмо для подтверждения email.</p>
+        {% if error %}<div class="flash flash--danger" role="alert"><span class="flash__icon">{% include 'includes/icon.html' with name='alert' %}</span><div class="flash__text">{{ error }}</div></div><div style="height:16px"></div>{% endif %}
+        <form method="post">
+            {% csrf_token %}
+            <div class="field">
+                <label class="field__label" for="username">Логин</label>
+                <input class="form-control" type="text" name="username" id="username" value="{{ request.POST.username }}" autocomplete="username" autocapitalize="none" required autofocus>
+            </div>
+            <div class="field">
+                <label class="field__label" for="email">Email</label>
+                <input class="form-control" type="email" name="email" id="email" value="{{ request.POST.email }}" autocomplete="email" placeholder="name@example.com" required>
+            </div>
+            <div class="field">
+                <label class="field__label" for="password1">Пароль</label>
+                <input class="form-control" type="password" name="password1" id="password1" autocomplete="new-password" data-min-length="8" aria-describedby="password1-hint" required>
+                <div class="hint" id="password1-hint">Минимум 8 символов</div>
+            </div>
+            <div class="field">
+                <label class="field__label" for="password2">Повторите пароль</label>
+                <input class="form-control" type="password" name="password2" id="password2" autocomplete="new-password" data-match="password1" aria-describedby="password2-hint" required>
+                <div class="hint" id="password2-hint" aria-live="polite"></div>
+            </div>
+            <button class="button button--primary button--lg button--block">Создать аккаунт</button>
+        </form>
+        <p class="auth__switch">Уже есть аккаунт? <a href="{% url 'login' %}">Войти</a></p>
+    </div>
+</div>
+{% endblock %}

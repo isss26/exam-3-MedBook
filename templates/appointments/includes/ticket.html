@@ -1,0 +1,18 @@
+{# Талон приёма. Параметры: slot, appointment (необязательно) #}
+<div class="ticket" style="max-width:640px">
+    <div class="ticket__date">
+        <span class="ticket__day">{{ slot.date|date:"j" }}</span>
+        <span class="ticket__month">{{ slot.date|date:"E" }}</span>
+        <span class="ticket__weekday">{{ slot.date|date:"D" }}</span>
+    </div>
+    <div class="ticket__body">
+        <div class="ticket__row">
+            <span class="ticket__time">{{ slot.start_time|time:"H:i" }}–{{ slot.end_time|time:"H:i" }}</span>
+            {% if appointment %}{% include 'appointments/includes/status_badge.html' %}{% endif %}
+        </div>
+        <div class="ticket__who">
+            {% include 'includes/avatar.html' with u=slot.doctor.user photo=slot.doctor.photo cls='avatar--sm' %}
+            <span><a href="{% url 'doctors:doctor_detail' slot.doctor.pk %}">{{ slot.doctor }}</a> <span class="muted">· {{ slot.doctor.specialization }}</span></span>
+        </div>
+    </div>
+</div>

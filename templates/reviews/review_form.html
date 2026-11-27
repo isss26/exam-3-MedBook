@@ -1,13 +1,22 @@
 {% extends 'base.html' %}
 {% block title %}{% if review %}Изменить отзыв{% else %}Новый отзыв{% endif %}{% endblock %}
 {% block content %}
-<h1 class="h3 mb-3">{% if review %}Изменить отзыв{% else %}Отзыв о враче{% endif %}: {{ doctor }}</h1>
-<form method="post" class="card card-body" style="max-width:560px">
+<a class="back-link" href="{% url 'doctors:doctor_detail' doctor.pk %}">{% include 'includes/icon.html' with name='back' %}Профиль врача</a>
+<header class="page-head">
+    <div class="person">
+        {% include 'includes/avatar.html' with u=doctor.user photo=doctor.photo cls='avatar--lg' %}
+        <div>
+            <h1>{% if review %}Изменить отзыв{% else %}Как прошёл приём?{% endif %}</h1>
+            <p>{{ doctor }} · {{ doctor.specialization }}</p>
+        </div>
+    </div>
+</header>
+<form method="post" class="panel panel--form" novalidate>
     {% csrf_token %}
     {% include 'includes/form_fields.html' %}
-    <div>
-        <button class="btn btn-primary">Сохранить</button>
-        <a href="{% url 'doctors:doctor_detail' doctor.pk %}" class="btn btn-link">Отмена</a>
+    <div class="form-actions">
+        <button class="button button--primary">{% if review %}Сохранить отзыв{% else %}Опубликовать отзыв{% endif %}</button>
+        <a href="{% url 'doctors:doctor_detail' doctor.pk %}" class="button button--ghost">Отмена</a>
     </div>
 </form>
 {% endblock %}

@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block title %}Статистика записей{% endblock %}
+{% block content %}
+<header class="page-head">
+    <div>
+        <h1>Статистика записей</h1>
+        <p>Сколько записей в каждом статусе — по клинике и по каждому врачу.</p>
+    </div>
+</header>
+
+<div class="stat-row">
+    <div class="stat stat--total">
+        <div class="stat__label">Всего записей</div>
+        <div class="stat__value">{{ total.all }}</div>
+    </div>
+    <div class="stat">
+        <div class="stat__label"><i class="c-pending"></i>Ожидают</div>
+        <div class="stat__value">{{ total.pending }}</div>
+    </div>
+    <div class="stat">
+        <div class="stat__label"><i class="c-confirmed"></i>Подтверждены</div>
+        <div class="stat__value">{{ total.confirmed }}</div>
+    </div>
+    <div class="stat">
+        <div class="stat__label"><i class="c-completed"></i>Завершены</div>
+        <div class="stat__value">{{ total.completed }}</div>
+    </div>
+    <div class="stat">
+        <div class="stat__label"><i class="c-cancelled"></i>Отменены</div>
+        <div class="stat__value">{{ total.cancelled }}</div>
+    </div>
+</div>
+
+<div class="results-bar">
+    <h2 class="section-title m-0">По врачам</h2>
+    <div class="legend" aria-hidden="true">
+        <span><i class="c-pending"></i>Ожидают</span>
+        <span><i class="c-confirmed"></i>Подтверждены</span>
+        <span><i class="c-completed"></i>Завершены</span>
+        <span><i class="c-cancelled"></i>Отменены</span>
+    </div>
+</div>
+
+{% if by_doctor %}
+<div class="table-wrap">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th scope="col">Врач</th>
+                <th scope="col">Распределение</th>
+                <th scope="col" class="num">Всего</th>
+                <th scope="col" class="num">Ожидают</th>
+                <th scope="col" class="num">Подтв.</th>
+                <th scope="col" class="num">Заверш.</th>
+                <th scope="col" class="num">Отмен.</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for doctor in by_doctor %}
+                <tr>
+                    <td class="cell-main">
+                        <div class="person">
+                            {% include 'includes/avatar.html' with u=doctor.user photo=doctor.photo cls='avatar--sm' %}
+                            <a class="person__name" href="{% url 'doctors:doctor_detail' doctor.pk %}">{{ doctor }}</a>
+                        </div>
+                    </td>
+                    <td data-label="Распределение">
+                        {% if doctor.all %}
+                        <div class="mix" role="img" aria-label="Ожидают {{ doctor.pending }}, подтверждены {{ doctor.confirmed }}, завершены {{ doctor.completed }}, отменены {{ doctor.cancelled }}">
+                            {% if doctor.pending %}<span class="c-pending" style="flex:{{ doctor.pending }}" data-tip="Ожидают: {{ doctor.pending }}"></span>{% endif %}
+                            {% if doctor.confirmed %}<span class="c-confirmed" style="flex:{{ doctor.confirmed }}" data-tip="Подтверждены: {{ doctor.confirmed }}"></span>{% endif %}
+                            {% if doctor.completed %}<span class="c-completed" style="flex:{{ doctor.completed }}" data-tip="Завершены: {{ doctor.completed }}"></span>{% endif %}
+                            {% if doctor.cancelled %}<span class="c-cancelled" style="flex:{{ doctor.cancelled }}" data-tip="Отменены: {{ doctor.cancelled }}"></span>{% endif %}
+                        </div>
+                        {% else %}<span class="muted">нет записей</span>{% endif %}
+                    </td>
+                    <td data-label="Всего" class="num cell-strong">{{ doctor.all }}</td>
+                    <td data-label="Ожидают" class="num">{{ doctor.pending }}</td>
+                    <td data-label="Подтверждены" class="num">{{ doctor.confirmed }}</td>
+                    <td data-label="Завершены" class="num">{{ doctor.completed }}</td>
+                    <td data-label="Отменены" class="num">{{ doctor.cancelled }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty"><strong>Врачей пока нет</strong>Добавьте врачей в каталог, и здесь появится статистика.</div>
+{% endif %}
+{% endblock %}

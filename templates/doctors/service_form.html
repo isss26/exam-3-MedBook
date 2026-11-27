@@ -1,13 +1,14 @@
 {% extends 'base.html' %}
 {% block title %}{% if object %}Изменить услугу{% else %}Новая услуга{% endif %}{% endblock %}
 {% block content %}
-<h1 class="h3 mb-3">{% if object %}Изменить услугу{% else %}Новая услуга{% endif %}</h1>
-<form method="post" class="card card-body" style="max-width:520px">
+<a class="back-link" href="{% url 'doctors:service_list' %}">{% include 'includes/icon.html' with name='back' %}Услуги</a>
+<header class="page-head"><div><h1>{% if object %}Изменить услугу{% else %}Новая услуга{% endif %}</h1></div></header>
+<form method="post" class="panel panel--narrow" novalidate>
     {% csrf_token %}
     {% include 'includes/form_fields.html' %}
-    <div>
-        <button class="btn btn-primary">Сохранить</button>
-        <a href="{% url 'doctors:service_list' %}" class="btn btn-link">Отмена</a>
+    <div class="form-actions">
+        <button class="button button--primary">{% if object %}Сохранить изменения{% else %}Добавить услугу{% endif %}</button>
+        <a href="{% url 'doctors:service_list' %}" class="button button--ghost">Отмена</a>
     </div>
 </form>
 {% endblock %}

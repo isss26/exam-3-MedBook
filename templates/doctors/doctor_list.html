@@ -1,49 +1,79 @@
 {% extends 'base.html' %}
 {% block title %}Врачи{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h3 m-0">Наши врачи</h1>
-    {% if is_admin %}<a class="btn btn-primary" href="{% url 'doctors:doctor_create' %}">+ Добавить врача</a>{% endif %}
+<section class="finder" aria-labelledby="finder-title">
+    <h1 id="finder-title">Запишитесь к врачу без звонков</h1>
+    <p>Выберите специалиста, посмотрите свободное время и запишитесь за минуту.</p>
+
+    <form method="get" class="search" role="search">
+        <div class="search__field">
+            {% include 'includes/icon.html' with name='search' %}
+            <label class="visually-hidden" for="q">Имя врача</label>
+            <input type="search" name="q" id="q" value="{{ q }}" class="form-control" placeholder="Имя или фамилия врача" autocomplete="off">
+        </div>
+        {% if selected_spec %}<input type="hidden" name="specialization" value="{{ selected_spec }}">{% endif %}
+        <button class="button button--primary">Найти</button>
+    </form>
+
+    {% if specializations %}
+    <nav class="chips chips--scroll" aria-label="Специализации">
+        <a class="chip{% if not selected_spec %} is-active{% endif %}" href="?{% if q %}q={{ q|urlencode }}{% endif %}">Все</a>
+        {% for spec in specializations %}
+            {% with pk_str=spec.pk|stringformat:"s" %}
+            <a class="chip{% if selected_spec == pk_str %} is-active{% endif %}"
+               href="?specialization={{ spec.pk }}{% if q %}&amp;q={{ q|urlencode }}{% endif %}"
+               {% if selected_spec == pk_str %}aria-current="true"{% endif %}>{{ spec.name }}</a>
+            {% endwith %}
+        {% endfor %}
+    </nav>
+    {% endif %}
+</section>
+
+<div class="results-bar">
+    <span class="results-bar__count">
+        {% if q or selected_spec %}Найдено врачей: <span class="num">{{ doctors|length }}</span>{% else %}Все врачи клиники · <span class="num">{{ doctors|length }}</span>{% endif %}
+    </span>
+    {% if is_admin %}
+        <a class="button button--primary button--sm" href="{% url 'doctors:doctor_create' %}">{% include 'includes/icon.html' with name='plus' %}Добавить врача</a>
+    {% endif %}
 </div>
 
-<form method="get" class="row g-2 mb-4">
-    <div class="col-md-6">
-        <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Поиск по имени">
-    </div>
-    <div class="col-md-4">
-        <select name="specialization" class="form-select">
-            <option value="">Все специализации</option>
-            {% for spec in specializations %}
-                <option value="{{ spec.pk }}" {% if selected_spec == spec.pk|stringformat:"s" %}selected{% endif %}>{{ spec.name }}</option>
-            {% endfor %}
-        </select>
-    </div>
-    <div class="col-md-2"><button class="btn btn-outline-primary w-100">Найти</button></div>
-</form>
-
-<div class="row g-3">
+{% if doctors %}
+<div class="doctor-grid">
     {% for doctor in doctors %}
-        <div class="col-md-4">
-            <div class="card h-100">
+        <article class="doctor-card">
+            <div class="doctor-card__photo">
                 {% if doctor.photo %}
-                    <img src="{{ doctor.photo.url }}" class="card-img-top" style="height:220px;object-fit:cover" alt="{{ doctor }}">
+                    <img src="{{ doctor.photo.url }}" alt="" loading="lazy">
+                {% else %}
+                    {% include 'includes/avatar.html' with u=doctor.user %}
                 {% endif %}
-                <div class="card-body">
-                    <h5 class="card-title">{{ doctor }}</h5>
-                    <p class="text-muted mb-1">{{ doctor.specialization }}</p>
+            </div>
+            <div class="doctor-card__body">
+                <h2 class="doctor-card__name"><a href="{% url 'doctors:doctor_detail' doctor.pk %}">{{ doctor }}</a></h2>
+                <div class="doctor-card__meta">
+                    <span class="tag tag--primary">{{ doctor.specialization }}</span>
                     {% if doctor.reviews_count %}
-                        <p class="mb-0">★ {{ doctor.avg_rating|floatformat:1 }} ({{ doctor.reviews_count }})</p>
+                        <span class="rating" aria-label="Рейтинг {{ doctor.avg_rating|floatformat:1 }} из 5">
+                            {% include 'includes/icon.html' with name='star' %}{{ doctor.avg_rating|floatformat:1 }}
+                            <span class="rating__count">({{ doctor.reviews_count }})</span>
+                        </span>
                     {% else %}
-                        <p class="mb-0 text-muted">Пока нет отзывов</p>
+                        <span class="rating--none">Нет отзывов</span>
                     {% endif %}
                 </div>
-                <div class="card-footer bg-white">
-                    <a href="{% url 'doctors:doctor_detail' doctor.pk %}" class="btn btn-sm btn-outline-primary">Подробнее</a>
-                </div>
             </div>
-        </div>
-    {% empty %}
-        <p class="text-muted">Врачи не найдены.</p>
+            <div class="doctor-card__foot">
+                <a href="{% url 'appointments:available_slots' doctor.pk %}" class="button button--block">{% include 'includes/icon.html' with name='calendar' %}Выбрать время</a>
+            </div>
+        </article>
     {% endfor %}
 </div>
+{% else %}
+<div class="empty">
+    <strong>Никого не нашли</strong>
+    Попробуйте другое имя или уберите фильтр по специализации.
+    <div><a class="button button--sm" href="{% url 'doctors:doctor_list' %}">Сбросить поиск</a></div>
+</div>
+{% endif %}
 {% endblock %}

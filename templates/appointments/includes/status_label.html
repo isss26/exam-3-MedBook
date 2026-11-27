@@ -1,0 +1,1 @@
+{# Русская подпись статуса по значению s #}{% if s == 'pending' %}Ожидает{% elif s == 'confirmed' %}Подтверждена{% elif s == 'completed' %}Завершена{% elif s == 'cancelled' %}Отменена{% else %}{{ s|default:"—" }}{% endif %}

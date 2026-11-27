@@ -46,7 +46,7 @@ def slot_create(request):
 def slot_delete(request, pk):
     slot = get_object_or_404(TimeSlot, pk=pk, doctor=request.user.doctor)
 
-    if slot.is_booked:
+    if slot.is_booked or slot.appointments.exists():  # ← ИЗМЕНЕНО
         messages.error(request, 'Нельзя удалить слот, на который есть запись')
     else:
         slot.delete()

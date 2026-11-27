@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}{% if object %}Редактирование записи{% else %}Запись на приём{% endif %}{% endblock %}
+{% block content %}
+{% if object %}
+    {% with s=object.slot %}
+    <a class="back-link" href="{% url 'appointments:appointment_detail' object.pk %}">{% include 'includes/icon.html' with name='back' %}К записи</a>
+    <header class="page-head"><div><h1>Изменить комментарий</h1><p>Врач увидит обновлённый текст перед приёмом.</p></div></header>
+    {% include 'appointments/includes/ticket.html' with slot=s %}
+    {% endwith %}
+{% else %}
+    <a class="back-link" href="{% url 'appointments:available_slots' slot.doctor_id %}">{% include 'includes/icon.html' with name='back' %}Другое время</a>
+    <ol class="steps" aria-label="Шаги записи">
+        <li class="is-done">Врач</li>
+        <li class="is-done">Время</li>
+        <li class="is-current" aria-current="step">Подтверждение</li>
+    </ol>
+    <header class="page-head"><div><h1>Проверьте запись</h1><p>Если нужно, опишите жалобы — так врач подготовится к приёму.</p></div></header>
+    {% include 'appointments/includes/ticket.html' with slot=slot %}
+{% endif %}
+
+<form method="post" class="panel panel--form" style="margin-top:16px" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+        <div class="form-errors" role="alert">{% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}</div>
+    {% endif %}
+    {% with f=form.comment %}
+    <div class="field{% if f.errors %} has-error{% endif %}">
+        <label class="field__label" for="{{ f.id_for_label }}">Комментарий для врача <span class="muted">— необязательно</span></label>
+        <textarea class="form-control" name="{{ f.html_name }}" id="{{ f.id_for_label }}" rows="4" data-max="500"
+                  placeholder="Например: давление поднимается по вечерам, иногда болит голова">{{ f.value|default_if_none:"" }}</textarea>
+        {% for error in f.errors %}<div class="field__error">{{ error }}</div>{% endfor %}
+    </div>
+    {% endwith %}
+    <div class="form-actions">
+        <button class="button button--primary button--lg">{% if object %}Сохранить комментарий{% else %}Записаться на приём{% endif %}</button>
+        {% if object %}
+            <a href="{% url 'appointments:appointment_detail' object.pk %}" class="button button--ghost">Отмена</a>
+        {% else %}
+            <a href="{% url 'appointments:available_slots' slot.doctor_id %}" class="button button--ghost">Отмена</a>
+        {% endif %}
+    </div>
+</form>
+{% endblock %}

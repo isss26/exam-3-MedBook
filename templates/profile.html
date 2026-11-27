@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block title %}Профиль{% endblock %}
+{% block content %}
+<section class="panel me" style="margin-bottom:28px">
+    {% include 'includes/avatar.html' with u=user cls='avatar--lg' %}
+    <div class="me__info">
+        <h1>{{ user.get_full_name|default:user.username }}</h1>
+        <div class="me__meta">
+            <span class="tag tag--primary">{{ user.get_role_display }}</span>
+            <span style="margin-left:8px">{{ user.username }}{% if user.email %} · {{ user.email }}{% endif %}</span>
+        </div>
+    </div>
+    <a href="{% url 'change_password' %}" class="button button--sm">{% include 'includes/icon.html' with name='key' %}Сменить пароль</a>
+</section>
+
+<section class="section">
+    <h2 class="section-title">Быстрые действия</h2>
+    <div class="quick-links">
+        {% if user.role == 'patient' %}
+            <a class="quick-link" href="{% url 'doctors:doctor_list' %}">{% include 'includes/icon.html' with name='plus' %}<span>Записаться к врачу<small>Выбрать специалиста и время</small></span></a>
+            <a class="quick-link" href="{% url 'appointments:my_appointments' %}">{% include 'includes/icon.html' with name='clipboard' %}<span>Мои записи<small>Статусы и история приёмов</small></span></a>
+        {% endif %}
+        {% if is_doctor %}
+            <a class="quick-link" href="{% url 'schedules:doctor_schedule' user.doctor.pk %}">{% include 'includes/icon.html' with name='calendar' %}<span>Моё расписание<small>Добавить или убрать слоты</small></span></a>
+            <a class="quick-link" href="{% url 'appointments:doctor_appointments' %}">{% include 'includes/icon.html' with name='clipboard' %}<span>Записи ко мне<small>Подтвердить и завершить приём</small></span></a>
+        {% endif %}
+        {% if is_admin %}
+            <a class="quick-link" href="{% url 'appointments:dashboard' %}">{% include 'includes/icon.html' with name='chart' %}<span>Статистика<small>Записи по статусам и врачам</small></span></a>
+            <a class="quick-link" href="{% url 'doctors:doctor_create' %}">{% include 'includes/icon.html' with name='plus' %}<span>Добавить врача<small>Новый специалист в каталоге</small></span></a>
+            <a class="quick-link" href="{% url 'admin:index' %}">{% include 'includes/icon.html' with name='settings' %}<span>Админ-панель<small>Django Admin</small></span></a>
+        {% endif %}
+    </div>
+</section>
+
+{% if user.role == 'patient' %}
+<section class="section">
+    <div class="results-bar">
+        <h2 class="section-title m-0">Последние записи</h2>
+        <a href="{% url 'appointments:my_appointments' %}">Все записи</a>
+    </div>
+    {% if appointments %}
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead><tr><th scope="col">Врач</th><th scope="col">Когда</th><th scope="col">Статус</th></tr></thead>
+            <tbody>
+                {% for appointment in appointments %}
+                    <tr>
+                        <td class="cell-main">
+                            <div class="person">
+                                {% include 'includes/avatar.html' with u=appointment.slot.doctor.user photo=appointment.slot.doctor.photo cls='avatar--sm' %}
+                                <a class="person__name" href="{% url 'appointments:appointment_detail' appointment.pk %}">{{ appointment.slot.doctor }}</a>
+                            </div>
+                        </td>
+                        <td data-label="Когда" class="tabular">{{ appointment.slot.date|date:"j E" }}, {{ appointment.slot.start_time|time:"H:i" }}</td>
+                        <td data-label="Статус">{% include 'appointments/includes/status_badge.html' %}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty">
+        <strong>Записей пока нет</strong>
+        Выберите врача и удобное время.
+        <div><a class="button button--sm button--primary" href="{% url 'doctors:doctor_list' %}">Найти врача</a></div>
+    </div>
+    {% endif %}
+</section>
+{% endif %}
+{% endblock %}

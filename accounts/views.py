@@ -1,6 +1,5 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
-from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
@@ -75,9 +74,8 @@ def logout_view(request):
 
 @login_required
 def profile(request):
-    applications = request.user.applications.select_related('job', 'job__company', 'job__category')
-    accepted = applications.filter(status='accepted')
-    return render(request, 'profile.html', {'applications': applications, 'accepted': accepted})
+    appointments = request.user.appointments.select_related('slot', 'slot__doctor', 'slot__doctor__user').order_by('-created_at')[:5]  # ← ИЗМЕНЕНО
+    return render(request, 'profile.html', {'appointments': appointments})  # ← ИЗМЕНЕНО
 
 
 @login_required
@@ -97,4 +95,3 @@ def change_password(request):
         update_session_auth_hash(request, request.user)
         return redirect('profile')
     return render(request, 'change_password.html')
-

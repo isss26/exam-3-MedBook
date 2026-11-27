@@ -1,13 +1,19 @@
 {% extends 'base.html' %}
 {% block title %}Новый слот{% endblock %}
 {% block content %}
-<h1 class="h3 mb-3">Новый слот</h1>
-<form method="post" class="card card-body" style="max-width:420px">
+<a class="back-link" href="{% url 'schedules:doctor_schedule' user.doctor.pk %}">{% include 'includes/icon.html' with name='back' %}Моё расписание</a>
+<header class="page-head">
+    <div>
+        <h1>Новый слот</h1>
+        <p>Укажите день и время приёма. Слот сразу появится у пациентов.</p>
+    </div>
+</header>
+<form method="post" class="panel panel--narrow" novalidate>
     {% csrf_token %}
     {% include 'includes/form_fields.html' %}
-    <div>
-        <button class="btn btn-primary">Создать</button>
-        <a href="{% url 'schedules:doctor_schedule' user.doctor.pk %}" class="btn btn-link">Отмена</a>
+    <div class="form-actions">
+        <button class="button button--primary">Добавить слот</button>
+        <a href="{% url 'schedules:doctor_schedule' user.doctor.pk %}" class="button button--ghost">Отмена</a>
     </div>
 </form>
 {% endblock %}

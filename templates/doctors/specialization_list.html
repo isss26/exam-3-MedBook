@@ -1,18 +1,27 @@
 {% extends 'base.html' %}
 {% block title %}Специализации{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h3 m-0">Специализации</h1>
-    {% if is_admin %}<a class="btn btn-primary" href="{% url 'doctors:specialization_create' %}">+ Добавить</a>{% endif %}
-</div>
-<ul class="list-group">
+<header class="page-head">
+    <div>
+        <h1>Специализации</h1>
+        <p>Выберите направление, чтобы увидеть врачей.</p>
+    </div>
+    {% if is_admin %}<a class="button button--primary" href="{% url 'doctors:specialization_create' %}">{% include 'includes/icon.html' with name='plus' %}Добавить</a>{% endif %}
+</header>
+{% if specializations %}
+<div class="spec-grid">
     {% for spec in specializations %}
-        <li class="list-group-item d-flex justify-content-between">
-            <a href="{% url 'doctors:doctor_list' %}?specialization={{ spec.pk }}">{{ spec.name }}</a>
-            <span class="badge bg-primary rounded-pill">{{ spec.doctors_count }}</span>
-        </li>
-    {% empty %}
-        <li class="list-group-item text-muted">Специализаций пока нет.</li>
+        <a class="spec-tile" href="{% url 'doctors:doctor_list' %}?specialization={{ spec.pk }}">
+            <span>{{ spec.name }}</span>
+            <span class="spec-tile__count">врачей: {{ spec.doctors_count }}</span>
+        </a>
     {% endfor %}
-</ul>
+</div>
+{% else %}
+<div class="empty">
+    <strong>Специализаций пока нет</strong>
+    {% if is_admin %}Добавьте первую, чтобы врачей можно было распределить по направлениям.
+    <div><a class="button button--sm button--primary" href="{% url 'doctors:specialization_create' %}">Добавить специализацию</a></div>{% else %}Каталог скоро появится.{% endif %}
+</div>
+{% endif %}
 {% endblock %}
