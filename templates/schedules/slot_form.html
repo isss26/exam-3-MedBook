@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}Новый слот{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">Новый слот</h1>
+<form method="post" class="card card-body" style="max-width:420px">
+    {% csrf_token %}
+    {% include 'includes/form_fields.html' %}
+    <div>
+        <button class="btn btn-primary">Создать</button>
+        <a href="{% url 'schedules:doctor_schedule' user.doctor.pk %}" class="btn btn-link">Отмена</a>
+    </div>
+</form>
+{% endblock %}

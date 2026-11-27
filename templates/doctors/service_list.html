@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Услуги{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 m-0">Услуги</h1>
+    {% if is_admin %}<a class="btn btn-primary" href="{% url 'doctors:service_create' %}">+ Добавить</a>{% endif %}
+</div>
+<ul class="list-group">
+    {% for service in services %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span>{{ service.name }} <small class="text-muted">· врачей: {{ service.doctors_count }}</small></span>
+            {% if is_admin %}
+                <span>
+                    <a href="{% url 'doctors:service_edit' service.pk %}" class="btn btn-sm btn-outline-secondary">Изменить</a>
+                    <a href="{% url 'doctors:service_delete' service.pk %}" class="btn btn-sm btn-outline-danger">Удалить</a>
+                </span>
+            {% endif %}
+        </li>
+    {% empty %}
+        <li class="list-group-item text-muted">Услуг пока нет.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

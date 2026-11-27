@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}Деактивация врача{% endblock %}
+{% block content %}
+<div class="card card-body" style="max-width:520px">
+    <h1 class="h4">Деактивировать врача?</h1>
+    <p>Врач <strong>{{ doctor }}</strong> пропадёт из каталога. Данные и отзывы сохранятся.</p>
+    <form method="post">
+        {% csrf_token %}
+        <button class="btn btn-danger">Деактивировать</button>
+        <a href="{% url 'doctors:doctor_detail' doctor.pk %}" class="btn btn-link">Отмена</a>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}{{ doctor }}{% endblock %}
+{% block content %}
+<div class="row g-4">
+    <div class="col-md-4">
+        {% if doctor.photo %}<img src="{{ doctor.photo.url }}" class="img-fluid rounded" alt="{{ doctor }}">{% endif %}
+    </div>
+    <div class="col-md-8">
+        <h1 class="h3">
+            {{ doctor }}
+            {% if not doctor.is_active %}<span class="badge bg-secondary">неактивен</span>{% endif %}
+        </h1>
+        <p class="text-muted">{{ doctor.specialization }}</p>
+        {% if rating.count %}
+            <p>★ {{ rating.avg|floatformat:1 }} · отзывов: {{ rating.count }}</p>
+        {% else %}
+            <p class="text-muted">Пока нет отзывов</p>
+        {% endif %}
+        {% if doctor.description %}<p>{{ doctor.description|linebreaksbr }}</p>{% endif %}
+
+        <a class="btn btn-sm btn-outline-primary" href="{% url 'schedules:doctor_schedule' doctor.pk %}">Расписание</a>
+        {% if is_admin %}
+            <a class="btn btn-sm btn-outline-secondary" href="{% url 'doctors:doctor_edit' doctor.pk %}">Редактировать</a>
+            {% if doctor.is_active %}
+                <a class="btn btn-sm btn-outline-danger" href="{% url 'doctors:doctor_delete' doctor.pk %}">Деактивировать</a>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+
+<h2 class="h5 mt-4">Услуги</h2>
+<ul>
+    {% for service in doctor.services.all %}
+        <li>{{ service.name }}</li>
+    {% empty %}
+        <li class="text-muted">Не указаны</li>
+    {% endfor %}
+</ul>
+
+<h2 class="h5 mt-4">Свободные слоты</h2>
+<div class="d-flex flex-wrap gap-2">
+    {% for slot in free_slots %}
+        {# адрес записи — приложение appointments (Участник 2) #}
+        <a href="/appointments/book/{{ slot.pk }}/" class="btn btn-outline-success btn-sm">
+            {{ slot.date|date:"d.m.Y" }} {{ slot.start_time|time:"H:i" }}–{{ slot.end_time|time:"H:i" }}
+        </a>
+    {% empty %}
+        <p class="text-muted">Свободных слотов нет.</p>
+    {% endfor %}
+</div>
+
+<h2 class="h5 mt-4">Отзывы</h2>
+{% for review in reviews %}
+    <div class="card mb-2">
+        <div class="card-body">
+            <strong>{{ review.author.username }}</strong> — ★ {{ review.rating }}
+            <small class="text-muted">{{ review.created_at|date:"d.m.Y" }}</small>
+            {% if review.text %}<p class="mb-1 mt-2">{{ review.text|linebreaksbr }}</p>{% endif %}
+            {% if review.author_id == user.id %}
+                <a href="{% url 'reviews:review_edit' review.pk %}" class="btn btn-sm btn-link px-0">Изменить</a>
+                <a href="{% url 'reviews:review_delete' review.pk %}" class="btn btn-sm btn-link text-danger">Удалить</a>
+            {% endif %}
+        </div>
+    </div>
+{% empty %}
+    <p class="text-muted">Отзывов пока нет.</p>
+{% endfor %}
+{% endblock %}
