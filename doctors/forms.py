@@ -1,19 +1,3 @@
-from django import forms
-<<<<<<< HEAD:appointments/forms.py
-from .models import Appointment
-
-class AppointmentForms(forms.ModelForm):
-    class Meta:
-        model = Appointment
-        fields = ['comment']
-        widgets = {'comment': forms.Textarea(attrs={'placeholder': 'Describe your complaint', 'rows': 3})}
-
-    def clean_comment(self):
-        comment = self.cleaned_data.get('comment')
-        if len(comment) > 500:
-            raise forms.ValidationError('Comment is too long')
-        return comment
-=======
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from .models import Doctor, Specialization, Service
@@ -61,4 +45,3 @@ class ServiceForm(BootstrapMixin, forms.ModelForm):
     class Meta:
         model = Service
         fields = ['name']
->>>>>>> 60d96f0dff25c3000af12edd9a1275ba9b4e0b14:doctors/forms.py
