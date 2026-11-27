@@ -35,13 +35,10 @@ class TimeSlotForm(BootstrapMixin, forms.ModelForm):
 
         if not (d and start and end):
             return cleaned
-
         if start >= end:
             raise forms.ValidationError('Начало должно быть раньше конца')
-
         if timezone.make_aware(datetime.combine(d, start)) <= timezone.now():
             raise forms.ValidationError('Это время уже прошло')
-
         if TimeSlot.objects.filter(doctor=self.doctor, date=d, start_time__lt=end, end_time__gt=start).exists():
             raise forms.ValidationError('У вас уже есть слот на это время')
 

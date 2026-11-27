@@ -43,10 +43,6 @@ class DoctorForm(BootstrapMixin, forms.ModelForm):
         labels = {'user': 'Пользователь', 'specialization': 'Специализация', 'services': 'Услуги', 'photo': 'Фото', 'description': 'Описание', 'is_active': 'Активен'}
         widgets = {'services': forms.CheckboxSelectMultiple, 'description': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Описание врача...'}),}
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['user'].queryset = User.objects.filter(Q(doctor__isnull=True) | Q(pk=self.instance.user_id))
-
     def save(self, commit=True):
         doctor = super().save(commit=commit)
         if doctor.user.role != 'doctor':
